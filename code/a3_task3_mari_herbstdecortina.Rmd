@@ -1,0 +1,52 @@
+---
+title: "Assignment 3 Task 3 - Mari Herbst de Cortina"
+author: "Mari Herbst"
+date: "10/24/2021"
+output: html_document
+---
+
+```{r setup, include=TRUE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(here)
+library(tidyverse)
+library(dplyr)
+library(janitor)
+```
+
+### Read in the data using here() to create a system agnostic file path
+```{r}
+urchins <- read_csv(here("data", "urchins.csv"))
+```
+
+### Section 1: size comparisons for purple and red urchins
+
+- First, I want to make the data more coder friendly
+
+```{r}
+clean_urchins <- clean_names(urchins)
+```
+
+
+#### Data visualization - histogram
+
+- Line 1: Select dataframe and the variable to be counted
+- Line 2: Choose the type of graph, in this case, we are making a histogram. Also, select the variable by which to color code 
+- Line 3-7: Use labs() to name axes, title, and legend title
+- Line 8: Use facet_wrap() to divide the graph into 2 histograms, one for each common name of urchins
+
+```{r}
+ggplot(data = clean_urchins, aes(x = size)) +
+  geom_histogram(bins = 10, aes(fill = common_name)) +
+  labs(x = "urchin size (cm)",
+       title = "Distribution of Purple vs. Red Urchin Size",
+       legend = "Urchin species",
+       fill = "Urchin type") +
+  facet_wrap(vars(common_name))
+```
+
+
+
+##### Figure 1: Distribution of Purple vs. Red Urchin Size: 50 red and 50 purple urchins were measured for diameter (shell without spines) to the closest half centimeter across 5 sites on California's coast between 2008 and 2011
+
+
