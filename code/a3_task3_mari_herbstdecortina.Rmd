@@ -12,6 +12,7 @@ library(here)
 library(tidyverse)
 library(dplyr)
 library(janitor)
+library(kableExtra)
 ```
 
 ### Read in the data using here() to create a system agnostic file path
@@ -19,7 +20,7 @@ library(janitor)
 urchins <- read_csv(here("data", "urchins.csv"))
 ```
 
-### Section 1: size comparisons for purple and red urchins
+## Section 1: size comparisons for purple and red urchins
 
 - First, I want to make the data more coder friendly
 
@@ -28,12 +29,12 @@ clean_urchins <- clean_names(urchins)
 ```
 
 
-#### Data visualization - histogram
+### Data visualization - histogram
 
-- Line 1: Select dataframe and the variable to be counted
-- Line 2: Choose the type of graph, in this case, we are making a histogram. Also, select the variable by which to color code 
-- Line 3-7: Use labs() to name axes, title, and legend title
-- Line 8: Use facet_wrap() to divide the graph into 2 histograms, one for each common name of urchins
+- Select dataframe and the variable to be counted
+- Choose the type of graph, in this case, we are making a histogram. Also, select the variable by which to color code
+- Use labs() to name axes, title, and legend title
+- Use facet_wrap() to divide the graph into 2 histograms, one for each common name of urchins
 
 ```{r}
 ggplot(data = clean_urchins, aes(x = size)) +
@@ -47,6 +48,30 @@ ggplot(data = clean_urchins, aes(x = size)) +
 
 
 
-##### Figure 1: Distribution of Purple vs. Red Urchin Size: 50 red and 50 purple urchins were measured for diameter (shell without spines) to the closest half centimeter across 5 sites on California's coast between 2008 and 2011
+##### Figure 1: Distribution of Purple vs. Red Urchin Size: Red and purple urchins were measured for diameter (shell without spines) to the closest half centimeter across 5 sites on California's coast between 2008 and 2011
 
+### Descriptive statistics table - summary table
 
+- Create a summary table grouped by urchin type that includes the mean and median size, the standard deviation in size, and the sample size for each urchin type.
+- Be sure to use kable() to name columns appropriately and with units!
+
+```{r}
+urchins_summary <- clean_urchins %>%
+  group_by(common_name) %>%
+  summarize(mean_size_cm = mean(size, na.rm = TRUE),
+            median_size_cm = median(size),
+            sd_size = sd(size),
+            sample_size = n())
+
+options(digits = 3)
+
+urchins_summary %>%
+  kable(col.names = c("Species",
+                      "Mean size (cm)",
+                      "Median size (cm)",
+                      "Standard deviation",
+                      "Sample Size"),
+        caption = "Table 1: A summary of urchin sizes showing the mean and median size, standard deviation in size, and sample size of each type of urchin that was studied.")
+```
+
+##### In general, red urchins are larger than purple urchins in this study area; the average purple urchin is 2.31cm smaller than the average red one. Red urchins are, on average, 1.52 times as large as purple urchins. There is a greater degree of spread amongst red urchins, indicated by the higher standard deviation figure.
