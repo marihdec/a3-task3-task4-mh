@@ -1,0 +1,61 @@
+---
+title: "Assignment 3 Task 4 - Mari Herbst de Cortina"
+author: "Mari Herbst"
+date: "10/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(lubridate)
+```
+
+#### data citation: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 20. Environmental Data Initiative. https://doi.org/10.6073/pasta/5a1e9ef03aa47bd2225c0bb98a02a63b. 
+
+#### This data measures red and purple urchin populations and diameter (to nearest 0.5 cm) at 5 sites between 2008 and 2020. The data collection related to urchin populations where giant kelp is left intact vs where it is removed once annually.
+
+## Read in the data using here() to create a system agnostic file path
+
+```{r}
+urchins <- read_csv(here("data", "urchins.csv"))
+```
+
+- First, I want to make the data more coder friendly.
+
+```{r}
+clean_urchins <- clean_names(urchins)
+```
+
+## Create a subset of clean_urchins containing:
+
+- Change class of date column to "date" using lubridate::mdy
+- Only for collections from the year 2010
+- Only purple urchins
+- Only urchin data collected at Naples Reef
+
+```{r}
+napl_urchins <- clean_urchins %>%
+  mutate(date = mdy(date)) %>% # change class of column
+  mutate(year = year(date)) %>% # create column for year only
+  filter(year == 2010) %>%
+  filter(common_name == "Purple Urchin") %>% # only purple urchins
+  filter(site == "NAPL") # only at Naples Reef
+```
+
+## Create a faceted histogram and q-q plot for the size distribution of urchins depending on treatment
+
+```{r}
+ggplot(data = napl_urchins, aes(x = size)) +
+  geom_histogram(bin = 10) +
+  facet_wrap(~ treatment) +
+  labs(x = "diameter (cm)")
+
+ggplot(data = napl_urchins, aes(sample = size)) +
+  geom_qq() +
+  facet_wrap(~ treatment)
+```
+
+Main takeaways: The samples from populations undergoing both treatments have relatively normally distributed urchin diameter/size. Smaller urchins seem to have more success in areas where kelp was cleared annually, whereas areas where kelp was not removed had a more even distribution of sizes.
