@@ -13,6 +13,7 @@ library(tidyverse)
 library(dplyr)
 library(janitor)
 library(kableExtra)
+library(lubridate)
 ```
 
 ### Read in the data using here() to create a system agnostic file path
@@ -75,3 +76,41 @@ urchins_summary %>%
 ```
 
 ##### In general, red urchins are larger than purple urchins in this study area; the average purple urchin is 2.31cm smaller than the average red one. Red urchins are, on average, 1.52 times as large as purple urchins. There is a greater degree of spread amongst red urchins, indicated by the higher standard deviation figure.
+
+
+## Section 2: urchin counts by site and year
+
+### Create a subset of data
+
+- only include purple urchin observations using filter()
+- convert date class to "Date" using myd()
+- create a column just for year using separate()
+- create a column called "site_full" containing the written out name of each site using case_when()
+
+```{r}
+purple_urchins <- clean_urchins %>%
+  filter(common_name == "Purple Urchin") %>%
+  mutate(date = mdy(date)) %>%
+  separate(col = date,
+           into = c("year", "month_day"),
+           sep = "-",
+           extra = "merge",
+           remove = TRUE) %>%
+  mutate(site_full = case_when(
+    site %in% c("NAPL") ~ "Naples Reef",
+    site %in% c("AQUE") ~ "Arroyo Quemado Reef",
+    site %in% c("CARP") ~ "Carpinteria Reef",
+    site %in% c("MOHK") ~ "Mohawk Reef",
+    site %in% c("IVEE") ~ "Isla Vista Reef"))
+```
+
+### Create a table containing the total number of purple urchins observed by site and year
+
+- Use group_by() to select site_full and year
+- Summarize by sample size using n()
+
+```{r}
+purple_urchin_table <- purple_urchins %>%
+  group_by(site_full, year) %>%
+  summarize(total_urchins = n())
+```

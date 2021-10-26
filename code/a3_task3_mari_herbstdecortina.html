@@ -178,7 +178,8 @@ library(here)
 library(tidyverse)
 library(dplyr)
 library(janitor)
-library(kableExtra)</code></pre>
+library(kableExtra)
+library(lubridate)</code></pre>
 <div id="read-in-the-data-using-here-to-create-a-system-agnostic-file-path" class="section level3">
 <h3>Read in the data using here() to create a system agnostic file path</h3>
 <pre class="r"><code>urchins &lt;- read_csv(here(&quot;data&quot;, &quot;urchins.csv&quot;))</code></pre>
@@ -294,6 +295,42 @@ Red Urchin
 <div id="in-general-red-urchins-are-larger-than-purple-urchins-in-this-study-area-the-average-purple-urchin-is-2.31cm-smaller-than-the-average-red-one.-red-urchins-are-on-average-1.52-times-as-large-as-purple-urchins.-there-is-a-greater-degree-of-spread-amongst-red-urchins-indicated-by-the-higher-standard-deviation-figure." class="section level5">
 <h5>In general, red urchins are larger than purple urchins in this study area; the average purple urchin is 2.31cm smaller than the average red one. Red urchins are, on average, 1.52 times as large as purple urchins. There is a greater degree of spread amongst red urchins, indicated by the higher standard deviation figure.</h5>
 </div>
+</div>
+</div>
+<div id="section-2-urchin-counts-by-site-and-year" class="section level2">
+<h2>Section 2: urchin counts by site and year</h2>
+<div id="create-a-subset-of-data" class="section level3">
+<h3>Create a subset of data</h3>
+<ul>
+<li>only include purple urchin observations using filter()</li>
+<li>convert date class to “Date” using myd()</li>
+<li>create a column just for year using separate()</li>
+<li>create a column called “site_full” containing the written out name of each site using case_when()</li>
+</ul>
+<pre class="r"><code>purple_urchins &lt;- clean_urchins %&gt;%
+  filter(common_name == &quot;Purple Urchin&quot;) %&gt;%
+  mutate(date = mdy(date)) %&gt;%
+  separate(col = date,
+           into = c(&quot;year&quot;, &quot;month_day&quot;),
+           sep = &quot;-&quot;,
+           extra = &quot;merge&quot;,
+           remove = TRUE) %&gt;%
+  mutate(site_full = case_when(
+    site %in% c(&quot;NAPL&quot;) ~ &quot;Naples Reef&quot;,
+    site %in% c(&quot;AQUE&quot;) ~ &quot;Arroyo Quemado Reef&quot;,
+    site %in% c(&quot;CARP&quot;) ~ &quot;Carpinteria Reef&quot;,
+    site %in% c(&quot;MOHK&quot;) ~ &quot;Mohawk Reef&quot;,
+    site %in% c(&quot;IVEE&quot;) ~ &quot;Isla Vista Reef&quot;))</code></pre>
+</div>
+<div id="create-a-table-containing-the-total-number-of-purple-urchins-observed-by-site-and-year" class="section level3">
+<h3>Create a table containing the total number of purple urchins observed by site and year</h3>
+<ul>
+<li>Use group_by() to select site_full and year</li>
+<li>Summarize by sample size using n()</li>
+</ul>
+<pre class="r"><code>purple_urchin_table &lt;- purple_urchins %&gt;%
+  group_by(site_full, year) %&gt;%
+  summarize(total_urchins = n())</code></pre>
 </div>
 </div>
 
