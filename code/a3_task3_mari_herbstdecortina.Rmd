@@ -16,14 +16,21 @@ library(kableExtra)
 library(lubridate)
 ```
 
+# Exploring Urchins
+
+#### data citation: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 20. Environmental Data Initiative. https://doi.org/10.6073/pasta/5a1e9ef03aa47bd2225c0bb98a02a63b. 
+
+#### This data measures red and purple urchin populations and diameter (to nearest 0.5 cm) at 5 sites between 2008 and 2020. The data collection related to urchin populations where giant kelp is left intact vs where it is removed once annually.
+
 ### Read in the data using here() to create a system agnostic file path
+
 ```{r}
 urchins <- read_csv(here("data", "urchins.csv"))
 ```
 
 ## Section 1: size comparisons for purple and red urchins
 
-- First, I want to make the data more coder friendly
+- First, I want to make the data more coder friendly.
 
 ```{r}
 clean_urchins <- clean_names(urchins)
@@ -32,15 +39,15 @@ clean_urchins <- clean_names(urchins)
 
 ### Data visualization - histogram
 
-- Select dataframe and the variable to be counted
-- Choose the type of graph, in this case, we are making a histogram. Also, select the variable by which to color code
-- Use labs() to name axes, title, and legend title
-- Use facet_wrap() to divide the graph into 2 histograms, one for each common name of urchins
+- Select dataframe and the variable to be counted.
+- Choose the type of graph, in this case, we are making a histogram. Also, select the variable by which to color code and select the number of bins for the histogram to organize data into.
+- Use labs() to name axes, title, and legend title.
+- Use facet_wrap() to divide the graph into 2 histograms, one for each common name of urchins.
 
 ```{r}
 ggplot(data = clean_urchins, aes(x = size)) +
   geom_histogram(bins = 10, aes(fill = common_name)) +
-  labs(x = "urchin size (cm)",
+  labs(x = "urchin diameter (cm)",
        title = "Distribution of Purple vs. Red Urchin Size",
        legend = "Urchin species",
        fill = "Urchin type") +
@@ -49,7 +56,7 @@ ggplot(data = clean_urchins, aes(x = size)) +
 
 
 
-##### Figure 1: Distribution of Purple vs. Red Urchin Size: Red and purple urchins were measured for diameter (shell without spines) to the closest half centimeter across 5 sites on California's coast between 2008 and 2011
+##### Figure 1. Distribution of Purple vs. Red Urchin Size: Red and purple urchins were measured for diameter (shell without spines) to the closest half centimeter across 5 sites on California's coast between 2008 and 2011.
 
 ### Descriptive statistics table - summary table
 
@@ -59,18 +66,16 @@ ggplot(data = clean_urchins, aes(x = size)) +
 ```{r}
 urchins_summary <- clean_urchins %>%
   group_by(common_name) %>%
-  summarize(mean_size_cm = mean(size, na.rm = TRUE),
-            median_size_cm = median(size),
-            sd_size = sd(size),
+  summarize(mean_size_cm = round(mean(size, na.rm = TRUE), 2),
+            median_size_cm = round(median(size), 2),
+            sd_size = round(sd(size), 2),
             sample_size = n())
-
-options(digits = 3)
 
 urchins_summary %>%
   kable(col.names = c("Species",
-                      "Mean size (cm)",
-                      "Median size (cm)",
-                      "Standard deviation",
+                      "Mean diameter (cm)",
+                      "Median diameter (cm)",
+                      "Standard deviation (cm)",
                       "Sample Size"),
         caption = "Table 1: A summary of urchin sizes showing the mean and median size, standard deviation in size, and sample size of each type of urchin that was studied.")
 ```
@@ -110,7 +115,27 @@ purple_urchins <- clean_urchins %>%
 - Summarize by sample size using n()
 
 ```{r}
-purple_urchin_table <- purple_urchins %>%
+purple_urchin_count <- purple_urchins %>%
   group_by(site_full, year) %>%
   summarize(total_urchins = n())
 ```
+
+### Create a graph of purple_urchin_count site
+
+- Use ggplot2::geom_histogram to make a histogram of urchin counts
+- Use labs() to label axes and title
+- Use facet_wrap() to break graphs up by site
+
+```{r}
+ggplot(data = purple_urchin_count, aes(x = year, y = total_urchins)) +
+  geom_col() +
+  labs(x = "year",
+       y = "purple urchin count",
+       title = "Purple Urchin Counts Per Year Per Site") +
+  theme(axis.text.x = element_text(angle = 90)) + # change angle of x axis values to make easier to read
+  facet_wrap(~ site_full)
+```
+
+##### Figure 2. Purple Urchin Counts Per Year Per Site: At all sites aside from Isla Vista Reef, purple urchin counts decreased between 2009 and 2012 and then have stayed relatively consistent through 2020. At Isla Vista Reef, no purple urchins were observed until 2012 and have had a relatively consistent population since then. In order to understand whether these changes are representative of the true urchin populations in these locations, we would need to examine some summary statistics for these samples. The treatments from the study could be affecting urchin populations, as could predation, competition, or weather events
+
+## END TASK 3
