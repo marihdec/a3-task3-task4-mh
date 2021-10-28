@@ -5,12 +5,14 @@ date: "10/26/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 library(tidyverse)
 library(here)
 library(lubridate)
+library(janitor)
+library(kableExtra)
 ```
 
 # Naples Reef Urchins
@@ -19,21 +21,25 @@ data citation: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal
 
 This data measures red and purple urchin populations and diameter (to nearest 0.5 cm) at 5 sites between 2008 and 2020. The data collection related to urchin populations where giant kelp is left intact vs where it is removed once annually.
 
-### Read in the data using here() to create a system agnostic file path
+### Read in the data
+
+- use here() to create a system agnostic file path
 
 ```{r}
 urchins <- read_csv(here("data", "urchins.csv"))
 ```
 
-- First, I want to make the data more coder friendly.
+- Before we begin wrangling, I want to make the data more coder friendly.
 
 ```{r}
 clean_urchins <- clean_names(urchins)
 ```
 
-## Create a subset of clean_urchins containing:
+### Create a subset of data
 
-- Only for collections from the year 2010 (first, change class of date column to "date" using lubridate::mdy)
+Called napl_urchins containing:
+
+- Only data collected during the year 2010 (first, change class of date column to "date" using lubridate::mdy)
 - Only purple urchins
 - Only urchin data collected at Naples Reef
 
@@ -46,18 +52,45 @@ napl_urchins <- clean_urchins %>%
   filter(site == "NAPL") # only at Naples Reef
 ```
 
-## Create a faceted histogram and q-q plot for the size distribution of urchins depending on treatment
+### Data visualization 
+
+- faceted histogram and q-q plot for the size distribution of urchins depending on treatment
+- use facet_wrap() to break graph into treatments
+- label axes
 
 ```{r}
 ggplot(data = napl_urchins, aes(x = size)) + # select data and axes
-  geom_histogram(bin = 10, fill = "darkolivegreen") + # select graph type and number of bins, color bins
+  geom_histogram(bin = 10, fill = "darkolivegreen", binwidth = 0.5) + # select graph type and number of bins, width of bins, color of bins
   facet_wrap(~ treatment) + # break graph into one for each treatment
-  labs(x = "diameter (cm)") # name x axis
+  labs(x = "diameter (cm)",
+       title = "Purple Urchin Size Distribution per Treatment at Naples Reef (2010") # name x axis
 
 ggplot(data = napl_urchins, aes(sample = size)) + # select data. q-q requires sample = variable
   geom_qq() + # select graph type 
   facet_wrap(~ treatment) + # break plot into one for each treatment
-  theme_dark() # stylistic choice
+  theme_dark() + # stylistic choice
+  labs(title = "Q-Q Plot of Purple Urchin Distributions at Naples Reef (2010) per Treatment")
 ```
 
 Main takeaways: The samples from populations undergoing both treatments have relatively normally distributed urchin diameter/size. Smaller urchins seem to have more success in areas where kelp was cleared annually, whereas areas where kelp was not removed had a more even distribution of sizes.
+
+### Create a finalized summary table
+
+- Group by treatment
+- Include mean, standard deviation, median, sample size
+- Name columns
+
+```{r}
+napl_summary <- napl_urchins %>%
+  group_by(treatment) %>%
+  summarize(mean_size = mean(size),
+            sd_size = round(sd(size), 2),
+            median_size = median(size),
+            sample_size = n())
+
+napl_summary %>%
+  kable(col.names = c("Treatment", "Mean diameter (cm)", "Standard deviation (cm)", "Median diameter (cm)", "Sample Size"),
+        caption = "Table 1. Summary of Purple Urchin Diameter by Treatment at Naples Reef: Purple urchin diameters were recorded at Naples Reef in 2010 to explore size differences that may result from the study treatments. The two treatments were 'CONTROL', no giant kelp removal, or 'ANNUAL', a once annual removal of giant kelp with subsequent regrowth.")
+```
+
+# END TASK 4

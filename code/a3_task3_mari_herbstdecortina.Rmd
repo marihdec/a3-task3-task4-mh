@@ -28,7 +28,7 @@ Read in the data using here() to create a system agnostic file path
 urchins <- read_csv(here("data", "urchins.csv"))
 ```
 
-## Section 1: size comparisons for purple and red urchins
+## Section 1
 
 - First, I want to make the data more coder friendly.
 
@@ -48,7 +48,7 @@ clean_urchins <- clean_names(urchins)
 ggplot(data = clean_urchins, aes(x = size)) +
   geom_histogram(bins = 10, aes(fill = common_name)) +
   labs(x = "urchin diameter (cm)",
-       title = "Distribution of Purple vs. Red Urchin Size",
+       title = "Distribution of Purple vs. Red Urchin Size (2008-2020)",
        legend = "Urchin species",
        fill = "Urchin type") +
   facet_wrap(vars(common_name)) +
@@ -57,7 +57,7 @@ ggplot(data = clean_urchins, aes(x = size)) +
 
 
 
-##### Figure 1. Distribution of Purple vs. Red Urchin Size: Red and purple urchins were measured for diameter (shell without spines) to the closest half centimeter across 5 sites on California's coast between 2008 and 2011.
+Figure 1. Distribution of Purple vs. Red Urchin Size: Red and purple urchins were measured for diameter (shell without spines) to the closest half centimeter across 5 sites on California's coast between 2008 and 2011.
 
 ### Descriptive statistics table
 
@@ -78,13 +78,13 @@ urchins_summary %>%
                       "Median diameter (cm)",
                       "Standard deviation (cm)",
                       "Sample Size"),
-        caption = "Table 1: A summary of urchin sizes showing the mean and median size, standard deviation in size, and sample size of each type of urchin that was studied.") # add table caption
+        caption = "Table 1: A summary of urchin sizes showing the mean and median size, standard deviation in size, and sample size of each type of urchin that was studied between 2008 and 2020.") # add table caption
 ```
 
 In general, red urchins are larger than purple urchins in this study area; the average purple urchin is 2.31cm smaller than the average red one. Red urchins are, on average, 1.52 times as large as purple urchins. There is a greater degree of spread amongst red urchins, indicated by the higher standard deviation figure.
 
 
-## Section 2: urchin counts by site and year
+## Section 2
 
 ### Create a subset of data
 
@@ -110,7 +110,9 @@ purple_urchins <- clean_urchins %>%
     site %in% c("IVEE") ~ "Isla Vista Reef"))
 ```
 
-### Create a table containing the total number of purple urchins observed by site and year
+### Create a summary table
+
+Table containing the total number of purple urchins observed by site and year
 
 - Use group_by() to select site_full and year
 - Summarize by sample size using n()
@@ -121,7 +123,9 @@ purple_urchin_count <- purple_urchins %>%
   summarize(total_urchins = n())
 ```
 
-### Create a graph of purple_urchin_count site
+### Data Visualization
+
+Create a graph of purple_urchin_count per site
 
 - Use ggplot2::geom_histogram to make a histogram of urchin counts
 - Use labs() to label axes and title
@@ -137,6 +141,6 @@ ggplot(data = purple_urchin_count, aes(x = year, y = total_urchins)) +
   facet_wrap(~ site_full)
 ```
 
-##### Figure 2. Purple Urchin Counts Per Year Per Site: At all sites aside from Isla Vista Reef, purple urchin counts decreased between 2009 and 2012 and then have stayed relatively consistent through 2020. At Isla Vista Reef, no purple urchins were observed until 2012 and have had a relatively consistent population since then. In order to understand whether these changes are representative of the true urchin populations in these locations, we would need to examine some summary statistics for these samples. The treatments from the study could be affecting urchin populations, as could predation, competition, or weather events
+Figure 2. Purple Urchin Counts Per Year Per Site: At all sites aside from Isla Vista Reef, purple urchin counts decreased between 2009 and 2012 and then have stayed relatively consistent through 2020. At Isla Vista Reef, no purple urchins were observed until 2012 and have had a relatively consistent population since then. In order to understand whether these changes are representative of the true urchin populations in these locations, we would need to examine some summary statistics for these samples. The treatments from the study could be affecting urchin populations, as could predation, competition, or weather events
 
 # END TASK 3
