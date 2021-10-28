@@ -18,11 +18,11 @@ library(lubridate)
 
 # Exploring Urchins
 
-#### data citation: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 20. Environmental Data Initiative. https://doi.org/10.6073/pasta/5a1e9ef03aa47bd2225c0bb98a02a63b. 
+data citation: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 20. Environmental Data Initiative. https://doi.org/10.6073/pasta/5a1e9ef03aa47bd2225c0bb98a02a63b. 
 
-#### This data measures red and purple urchin populations and diameter (to nearest 0.5 cm) at 5 sites between 2008 and 2020. The data collection related to urchin populations where giant kelp is left intact vs where it is removed once annually.
+This data measures red and purple urchin populations and diameter (to nearest 0.5 cm) at 5 sites between 2008 and 2020. The data collection related to urchin populations where giant kelp is left intact vs where it is removed once annually.
 
-### Read in the data using here() to create a system agnostic file path
+Read in the data using here() to create a system agnostic file path
 
 ```{r}
 urchins <- read_csv(here("data", "urchins.csv"))
@@ -37,7 +37,7 @@ clean_urchins <- clean_names(urchins)
 ```
 
 
-### Data visualization - histogram
+### Data visualization
 
 - Select dataframe and the variable to be counted.
 - Choose the type of graph, in this case, we are making a histogram. Also, select the variable by which to color code and select the number of bins for the histogram to organize data into.
@@ -51,14 +51,15 @@ ggplot(data = clean_urchins, aes(x = size)) +
        title = "Distribution of Purple vs. Red Urchin Size",
        legend = "Urchin species",
        fill = "Urchin type") +
-  facet_wrap(vars(common_name))
+  facet_wrap(vars(common_name)) +
+  theme_light() # stylistic choice
 ```
 
 
 
 ##### Figure 1. Distribution of Purple vs. Red Urchin Size: Red and purple urchins were measured for diameter (shell without spines) to the closest half centimeter across 5 sites on California's coast between 2008 and 2011.
 
-### Descriptive statistics table - summary table
+### Descriptive statistics table
 
 - Create a summary table grouped by urchin type that includes the mean and median size, the standard deviation in size, and the sample size for each urchin type.
 - Be sure to use kable() to name columns appropriately and with units!
@@ -66,21 +67,21 @@ ggplot(data = clean_urchins, aes(x = size)) +
 ```{r}
 urchins_summary <- clean_urchins %>%
   group_by(common_name) %>%
-  summarize(mean_size_cm = round(mean(size, na.rm = TRUE), 2),
+  summarize(mean_size_cm = round(mean(size, na.rm = TRUE), 2), # round(, #) indicates how many digits will be reported
             median_size_cm = round(median(size), 2),
             sd_size = round(sd(size), 2),
             sample_size = n())
 
 urchins_summary %>%
-  kable(col.names = c("Species",
+  kable(col.names = c("Species", # rename table headings in order of appearance
                       "Mean diameter (cm)",
                       "Median diameter (cm)",
                       "Standard deviation (cm)",
                       "Sample Size"),
-        caption = "Table 1: A summary of urchin sizes showing the mean and median size, standard deviation in size, and sample size of each type of urchin that was studied.")
+        caption = "Table 1: A summary of urchin sizes showing the mean and median size, standard deviation in size, and sample size of each type of urchin that was studied.") # add table caption
 ```
 
-##### In general, red urchins are larger than purple urchins in this study area; the average purple urchin is 2.31cm smaller than the average red one. Red urchins are, on average, 1.52 times as large as purple urchins. There is a greater degree of spread amongst red urchins, indicated by the higher standard deviation figure.
+In general, red urchins are larger than purple urchins in this study area; the average purple urchin is 2.31cm smaller than the average red one. Red urchins are, on average, 1.52 times as large as purple urchins. There is a greater degree of spread amongst red urchins, indicated by the higher standard deviation figure.
 
 
 ## Section 2: urchin counts by site and year
@@ -96,11 +97,11 @@ urchins_summary %>%
 purple_urchins <- clean_urchins %>%
   filter(common_name == "Purple Urchin") %>%
   mutate(date = mdy(date)) %>%
-  separate(col = date,
-           into = c("year", "month_day"),
-           sep = "-",
-           extra = "merge",
-           remove = TRUE) %>%
+  separate(col = date, # column to separate 
+           into = c("year", "month_day"), # columns to divide data into
+           sep = "-", # where to split the original column
+           extra = "merge", # if there are more separators, combine into the secondary column
+           remove = TRUE) %>% # remove the original column
   mutate(site_full = case_when(
     site %in% c("NAPL") ~ "Naples Reef",
     site %in% c("AQUE") ~ "Arroyo Quemado Reef",
@@ -128,7 +129,7 @@ purple_urchin_count <- purple_urchins %>%
 
 ```{r}
 ggplot(data = purple_urchin_count, aes(x = year, y = total_urchins)) +
-  geom_col() +
+  geom_col(fill = "lightblue") + # adding color for aesthetics
   labs(x = "year",
        y = "purple urchin count",
        title = "Purple Urchin Counts Per Year Per Site") +
@@ -138,4 +139,4 @@ ggplot(data = purple_urchin_count, aes(x = year, y = total_urchins)) +
 
 ##### Figure 2. Purple Urchin Counts Per Year Per Site: At all sites aside from Isla Vista Reef, purple urchin counts decreased between 2009 and 2012 and then have stayed relatively consistent through 2020. At Isla Vista Reef, no purple urchins were observed until 2012 and have had a relatively consistent population since then. In order to understand whether these changes are representative of the true urchin populations in these locations, we would need to examine some summary statistics for these samples. The treatments from the study could be affecting urchin populations, as could predation, competition, or weather events
 
-## END TASK 3
+# END TASK 3
